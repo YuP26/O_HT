@@ -4,17 +4,19 @@
 
 **Критерии:**  
 1) После настройки рабочего места у вас не должно возникать проблем с функциональными требованиями для выполнения домашних работ.  
-
+***
 #### **Описание реализации:**  
 Рабочее место представляет собой ноутбук со следующими характеристиками: CPU - i5-1235U, RAM - 16GB DDR4, NVMe - 512GB PCIx4_gen3, OS - Ubuntu 24.04.1 LTS.  
 Настройка производилась через Ansible с временно созданной виртуальной машины. На хост вручную установлен ssh, настроен доступ к ограниченным ресурсам Hashicorp. 
 
 Playbook обновляет систему и устанавливает следующее ПО на рабочее место:    
-traceroute net-tools tcpdump curl wget git Visual Studio Code virtualbox virtualbox-ext-pack ansible vagrant  
+***traceroute net-tools tcpdump curl wget git Visual Studio Code virtualbox virtualbox-ext-pack ansible vagrant***  
 
 Для подключения к хосту был создан файл inventory.ini следующего содержания:  
-`[myhost]
-192.168.0.122`
+```
+[myhost]  
+192.168.0.122
+```
 
 Для запуска playbook использвалась следующая команда:\
 `ansible-playbook -i inventory.ini o_ht-1.yml -u user --ask-pass --ask-become-pass | tee o_ht-1_result.txt`
@@ -182,6 +184,6 @@ ok: [192.168.0.122] => {
 
 PLAY RECAP *********************************************************************
 192.168.0.122              : ok=14   changed=11   unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
-```
+```***
 
 
