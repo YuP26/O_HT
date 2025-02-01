@@ -22,7 +22,7 @@ traceroute net-tools tcpdump curl wget git Visual Studio Code virtualbox virtual
 Ниже представлен вывод команды:\
 `ansible-playbook -i inventory.ini otus_1.yml -u yup --ask-pass --ask-become-pass | tee otus_1_result.txt`
 
-Результат работы playbook'а:\
+Результат работы playbook'а:
 ```
 PLAY [Set up work station] *****************************************************
 
