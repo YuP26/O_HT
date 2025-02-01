@@ -1,0 +1,94 @@
+---
+- name: Set up work station
+  hosts: all
+  become: true
+  tasks:
+
+  - name: update&upgrade
+    ansible.builtin.apt:
+      update_cache: true
+      upgrade: "yes"
+
+  - name:  Available packages installation
+    ansible.builtin.apt:
+      pkg: [traceroute, net-tools, tcpdump, curl, wget, git, ansible]
+
+  - name: VS-Code installation
+    command: snap install --classic code
+
+  - name: Add key Virtualbox repo
+    ansible.builtin.apt_key:
+      url: https://www.virtualbox.org/download/oracle_vbox_2016.asc
+      state: present
+
+  - name: Add Virtualbox repo
+    ansible.builtin.apt_repository:
+      repo: "deb [arch=amd64] http://download.virtualbox.org/virtualbox/debian {{ansible_distribution_release}} contrib"
+      state: present
+      update_cache: true
+
+  - name: Virtual Box installation
+    ansible.builtin.apt:
+      name: virtualbox-7.0
+      state: present
+      update_cache: true
+
+  - name: Download VirtualBox Extension Pack
+    ansible.builtin.get_url:
+      url: "https://download.virtualbox.org/virtualbox/7.0.22/Oracle_VM_VirtualBox_Extension_Pack-7.0.22.vbox-extpack"
+      dest: "/tmp/Oracle_VM_VirtualBox_Extension_Pack.vbox-extpack"
+      mode: '0644'
+
+  - name: Install VirtualBox Extension Pack
+    ansible.builtin.expect:
+      command: "VBoxManage extpack install --replace /tmp/Oracle_VM_VirtualBox_Extension_Pack.vbox-extpack"
+      responses: 
+        Do you agree to these license terms and conditions (y/n)? : "y"
+      
+  - name: Add key for Hashicorp repo
+    ansible.builtin.apt_key:
+      url: https://apt.releases.hashicorp.com/gpg
+      state: present
+  
+  - name: Add Hashicorp repo 
+    ansible.builtin.apt_repository:
+      repo: "deb [arch=amd64] https://apt.releases.hashicorp.com {{ansible_distribution_release}} main"
+      state: present 
+      update_cache: true
+
+  - name: Vagrant installation
+    ansible.builtin.apt:
+      name: vagrant
+      state: present
+
+  - name: Collecting result
+    ansible.builtin.shell: |
+        echo "WGET VERSION:"
+        wget -V
+        echo "\n-----\nTRACEROUTE VERSION:"
+        traceroute -V
+        echo "\n-----\nCHECKING NET-TOOLS VIA ROUTE COMMAND:"
+        route
+        echo "\n-----\nTCPDUMP VERSION:"
+        tcpdump --version 
+        echo "\n-----\nCURL VERSION:" 
+        curl -V
+        echo "\n-----\nGIT VERSION:"
+        git -v
+        echo "\n-----\nANSIBLE VERSION:"
+        ansible --version
+        echo "\n-----\nVIRTUALBOX VERSION:"
+        VBoxManage -V
+        echo "\n-----\nCHECKING VB EXT-PACK:"
+        VBoxManage list extpacks
+        echo "\n-----\nVAGRANT VERSION:"
+        vagrant version
+        echo "\n-----\nVS-CODE VERSION:"
+        code -v --no-sandbox --user-data-dir /home
+    register: result
+
+  - name: Show result
+    ansible.builtin.debug:
+      msg: "{{ result.stdout_lines }}"
+    
+
