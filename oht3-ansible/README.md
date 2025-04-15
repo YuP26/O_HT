@@ -31,7 +31,7 @@ $ vagrant -v
 Vagrant 2.4.3
 ```
 Vagrantfile - generic/ubuntu2204\
-Предварительно готовим конфигурационный файл ansible.cfg и inventory-файд staging/hosts/ .
+Предварительно готовим конфигурационный файл *ansible.cfg* , *templates/nginx.conf.j2* и inventory-файд *staging/hosts/* .
 
 ***
 ##### Запуск стенда и playbook.
