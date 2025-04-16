@@ -12,7 +12,7 @@
 README с описанием каждого решения (скриншоты и демонстрация приветствуются).\
 \
 2) Обеспечить работоспособность приложения при включенном selinux:\
-   развернуть приложенный стенд https://github.com/mbfx/otus-linux-adm/tree/master/selinux_dns_problems;\
+   развернуть приложенный стенд https://github.com/mbfx/otus-linux-adm/tree/master/selinux_dns_problems ; \
    выяснить причину неработоспособности механизма обновления зоны (см. README);\
    предложить решение (или решения) для данной проблемы;\
    выбрать одно из решений для реализации, предварительно обосновав выбор;\
@@ -33,14 +33,14 @@ README с анализом причины неработоспособности
 
 ****
 #### **Описание работы над заданием 1:**  
-Реализация выполнена согласно описанным в методическом указании шагам: [https://docs.google.com/document/d/1jTq4l4UD1CF9C_VFqGXZYunXA2RUap70CfKm_6OXZBU/edit?tab=t.0](https://docs.google.com/document/d/1QwyccIn8jijBKdaoNR4DCtTULEqb5MKK/edit?tab=t.0) \
+Реализация выполнена согласно описанным в методическом указании шагам: [https://docs.google.com/document/d/1jTq4l4UD1CF9C_VFqGXZYunXA2RUap70CfKm_6OXZBU/edit?tab=t.0](https://docs.google.com/document/d/1QwyccIn8jijBKdaoNR4DCtTULEqb5MKK/edit?tab=t.0).  \
 Сначала все описанные шаги в методичке были проведены вручную, затем переведены в ansible-playbook.\
 Ansible-playbook разбит на 3 блока с меткой, каждый из которых демонстрирует свой способ. Для запуска использовать следующие команды:
 ```
-ansible-playbook -i hosts selinux.yml --tags=setsebool
-ansible-playbook -i hosts selinux.yml --tags=semanage
-ansible-playbook -i hosts selinux.yml --tags=semodule
-ansible-playbook -i hosts selinux.yml # для запуска всего плейбука целиком
+ansible-playbook -i hosts selinux_1.yml --tags=setsebool
+ansible-playbook -i hosts selinux_1.yml --tags=semanage
+ansible-playbook -i hosts selinux_1.yml --tags=semodule
+ansible-playbook -i hosts selinux_1.yml # для запуска всего плейбука целиком
 ```
 
 ***
