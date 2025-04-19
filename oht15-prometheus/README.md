@@ -15,4 +15,4 @@
 #### **Результат:**  
 Установка prometheus и node exporter сделаны согласно инструкции в презентации. \
 Дашборд собран вручную. \
-!(screen.png)
+!(O_HT/oht15-prometheus/screen.png)
