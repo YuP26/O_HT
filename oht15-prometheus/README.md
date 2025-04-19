@@ -16,4 +16,4 @@
 Установка prometheus и node exporter сделаны согласно инструкции в презентации. \
 Дашборд собран вручную. \
 ![Скриншот дашборда](/screen.png)
-<img src="/screen.png" alt="Скриншот дашборда" width="200"/>
+<img src="[/screen.png](https://github.com/YuP26/O_HT/blob/main/oht15-prometheus/screen.png)" alt="Скриншот дашборда" width="200"/>
