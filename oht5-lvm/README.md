@@ -62,4 +62,4 @@ simply run `vagrant up`.
 $ ansible-playbook -i hosts lvm.yml
 ```
 ##### Результат.
-Результат работы ansible-playbook представлен в файле *ansible-result.txt*. \
+Результат работы ansible-playbook представлен в файле *ansible-result.txt*. 
