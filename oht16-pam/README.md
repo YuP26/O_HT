@@ -38,18 +38,47 @@ Ansible-playbook запускается в провижине при включ�
 
 Пытаемся безуспешно залогиниться по ssh по пользователем otus:
 ```
-
+ssh otus@192.168.56.10
+The authenticity of host '192.168.56.10 (192.168.56.10)' can't be established.
+ED25519 key fingerprint is SHA256:1a4pVoevE+WytxMne3KFiQ3Fz1vsBEfc3eEgf8ovGQY.
+This key is not known by any other names.
+Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+Warning: Permanently added '192.168.56.10' (ED25519) to the list of known hosts.
+otus@192.168.56.10's password: 
+Permission denied, please try again.
+otus@192.168.56.10's password: 
+Permission denied, please try again.
+otus@192.168.56.10's password: 
+otus@192.168.56.10: Permission denied (publickey,password).
 ```
 
 Теперь успешно через otusadm:
 ```
+ssh otusadm@192.168.56.10
+otusadm@192.168.56.10's password: 
+
+The programs included with the Ubuntu system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Ubuntu comes with ABSOLUTELY NO WARRANTY, to the extent permitted by
+applicable law.
+
+To run a command as administrator (user "root"), use "sudo <command>".
+See "man sudo_root" for details.
+
+otusadm@pam:~$ 
 
 ```
 Теперь безуспешно пробуем перезапустить докер и выполнить команды через docker-cli через otusadm:
 ```
-
+otusadm@pam:~$ docker container ls
+permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Get "http://%2Fvar%2Frun%2Fdocker.sock/v1.49/containers/json": dial unix /var/run/docker.sock: connect: permission denied
+otusadm@pam:~$ 
 ```
 Теперь успешно через пользователя otus:
 ```
-
+otus@pam:/home/otusadm$ docker container ls
+CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+otus@pam:/home/otusadm$ 
 ```
