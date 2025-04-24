@@ -14,6 +14,7 @@
 #### **Описание реализации:**  
 Реализация выполнена согласно описанным в методическом указании шагам: [https://docs.google.com/document/d/1jTq4l4UD1CF9C_VFqGXZYunXA2RUap70CfKm_6OXZBU/edit?tab=t.0](https://docs.google.com/document/d/1Xz7dCWSzaM8Q0VzBt78K3emh7zlNX3C-Q27B6UuVexI/edit?tab=t.0#heading=h.csr8pmcyj3iq) \
 Дз выполнено через ansible. \
+Плэйбук создает тестовые файлы, перезагружает хосты и выводит содержимое каталогов согласно этапам проверки в методичке.
 
 ***
 ##### Подготовка стенда.
