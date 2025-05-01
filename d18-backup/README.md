@@ -16,8 +16,7 @@
 ****
 #### **Описание реализации:**  
 Реализация выполнена согласно описанным в методическом указании шагам: [[https://docs.google.com/document/d/1jTq4l4UD1CF9C_VFqGXZYunXA2RUap70CfKm_6OXZBU/edit?tab=t.0](https://docs.google.com/document/d/1xursgUsGDVTLh4B_r0XGw_flPzd5lSJ0nfMFL-HQmFs/edit?tab=t.0)](https://docs.google.com/document/d/1L0VtVCn2tXmC0Pirlfhnr6rEpOANbP-C/edit?tab=t.0) \
-Шаги "описание команд и их вывод" (см. комменатрии в скрипте) и "особенности проектирования и реализации решения" упущены, т.к. реализация полностью повторяет методическое указание.
-Дз выполнено через ansible. \
+Дз выполнено через ansible, проверено вручную. \
 
 
 ***
