@@ -19,7 +19,7 @@
 ****
 #### **Описание реализации:**  
 Реализация выполнена согласно описанным в методическом указании шагам: [[https://docs.google.com/document/d/1jTq4l4UD1CF9C_VFqGXZYunXA2RUap70CfKm_6OXZBU/edit?tab=t.0](https://docs.google.com/document/d/1xursgUsGDVTLh4B_r0XGw_flPzd5lSJ0nfMFL-HQmFs/edit?tab=t.0)](https://docs.google.com/document/d/1rQH5M2MYclBkvmv3SO4wl4F_IErcojl86hD10ric6Lk/edit?tab=t.0) \
-Дз выполнено через bash и ansible. \
+Дз выполнено через ansible. \
 
 ****
 #### **Теоретическая часть** 
@@ -40,10 +40,10 @@
 - 192.168.0.32/28    - office hardware\
 - 192.168.0.64/26    - wifi\
 Схема:
-![Схема сети]([картинка](https://github.com/YuP26/O_HT/blob/main/oht19-network/top1.png))\
+![Схема сети](https://github.com/YuP26/O_HT/blob/main/oht19-network/top1.png)\
 \
 Считаем сети:
-![Сетевой план]([каринка с таблицей](https://github.com/YuP26/O_HT/blob/main/oht19-network/networks.png))\
+![Сетевой план](https://github.com/YuP26/O_HT/blob/main/oht19-network/networks.png)\
 \
 Свободные посети:\
 1) 192.168.0.16/28
@@ -58,7 +58,7 @@
 ***
 ##### Практическая часть.
 Анализируем схему:\
-![Подробная схема]([красивая картинка](https://github.com/YuP26/O_HT/blob/main/oht19-network/top2.png))\
+![Подробная схема](https://github.com/YuP26/O_HT/blob/main/oht19-network/top2.png)\
 \
 ***
 ##### Подготовка стенда.
