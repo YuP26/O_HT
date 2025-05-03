@@ -46,7 +46,7 @@ $ ansible-playbook -i hosts pxe.yml
 **Legacy:**\
 ![Получение образа](https://github.com/YuP26/O_HT/blob/main/oht20-pxe/legacy-1.png)\
 ![Процесс установки](https://github.com/YuP26/O_HT/blob/main/oht20-pxe/legacy-2.png)\
-![Установленная система](https://github.com/YuP26/O_HT/blob/main/oht20-pxe/legacy-2.png)\
+![Установленная система](https://github.com/YuP26/O_HT/blob/main/oht20-pxe/legacy-3.png)\
 \
 **UEFI:**\
 Добавлены конфиги в /srv/tftp/amd64/grub/grub.cfg. \
