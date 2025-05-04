@@ -44,13 +44,13 @@ $ ansible-playbook -i hosts pxe.yml
 ***
 ##### Проверка загрузки клиента.
 **Legacy:**\
-![Получение образа](https://github.com/YuP26/O_HT/blob/main/oht20-pxe/legacy-1.png)\
-![Процесс установки](https://github.com/YuP26/O_HT/blob/main/oht20-pxe/legacy-2.png)\
-![Установленная система](https://github.com/YuP26/O_HT/blob/main/oht20-pxe/legacy-3.png)\
+![Получение образа](https://github.com/YuP26/O_HT/blob/main/oht20-pxe/screens/legacy-1.png)\
+![Процесс установки](https://github.com/YuP26/O_HT/blob/main/oht20-pxe/screens/legacy-2.png)\
+![Установленная система](https://github.com/YuP26/O_HT/blob/main/oht20-pxe/screens/legacy-3.png)\
 \
 **UEFI:**\
 Добавлены конфиги в /srv/tftp/amd64/grub/grub.cfg. \
 Пришлось увеличивать объем ОЗУ до 8ГБ, иначе не зависает на разных этапах.\
-![GRUB](https://github.com/YuP26/O_HT/blob/main/oht20-pxe/uefi-1.png)\
-![Процесс установки](https://github.com/YuP26/O_HT/blob/main/oht20-pxe/uefi-2.png)\
-![Установленная система](https://github.com/YuP26/O_HT/blob/main/oht20-pxe/uefi-3.png)\
+![GRUB](https://github.com/YuP26/O_HT/blob/main/oht20-pxe/screens/uefi-1.png)\
+![Процесс установки](https://github.com/YuP26/O_HT/blob/main/oht20-pxe/screens/uefi-2.png)\
+![Установленная система](https://github.com/YuP26/O_HT/blob/main/oht20-pxe/screens/uefi-3.png)\
