@@ -1,5 +1,5 @@
 ### **Otus - Administrator Linux. Professional.**  
-#### **ДЗ №20 - Сценарии iptables**  
+#### **ДЗ №21 - Сценарии iptables**  
 **Цель** - Написать сценарии iptables.
 
 **Задание:**  
@@ -14,7 +14,7 @@
 #### **Описание реализации:**  
 
 Дз выполнено через ansible и проверено вручную \
-Реализация выполнена на основе стенда oht19-network. \
+Реализация выполнена на основе стенда oht19-network, но без office-сегментов. \
 К centralRouter (192.168.255.13) добавлено подключение inetRouter2 (192.168.255.14, 10.10.10.2, 192.168.56.13).
 
 
@@ -40,3 +40,27 @@ Vagrantfile - generic/ubuntu2204\
 
 ***
 ##### Запуск стенда. Запуск локального скрипта и playbook.
+```
+$ vagrant status
+Current machine states:
+
+inetRouter                running (virtualbox)
+inetRouter2               running (virtualbox)
+centralRouter             running (virtualbox)
+centralServer             running (virtualbox)
+office1Router             running (virtualbox)
+office1Server             running (virtualbox)
+office2Router             running (virtualbox)
+office2Server             running (virtualbox)
+
+This environment represents multiple VMs. The VMs are all listed
+above with their current state. For more information about a specific
+VM, run `vagrant status NAME`.
+```
+Запускаем плэйбук:
+```
+$ ansible-playbook -i hosts iptables.yml 
+```
+***
+##### Проверка.
+
