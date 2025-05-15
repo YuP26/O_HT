@@ -63,4 +63,47 @@ $ ansible-playbook -i hosts iptables.yml
 ```
 ***
 ##### Проверка.
+Проверяем с хостовой машины доступ до centralServer через 80й порт (сам nginx настроен на 8080):
+```
+$ curl http://192.168.56.13:80
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+<style>
+    body {
+        width: 35em;
+        margin: 0 auto;
+        font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+</style>
+</head>
+<body>
+<h1>Welcome to nginx!</h1>
+<p>If you see this page, the nginx web server is successfully installed and
+working. Further configuration is required.</p>
+
+<p>For online documentation and support please refer to
+<a href="http://nginx.org/">nginx.org</a>.<br/>
+Commercial support is available at
+<a href="http://nginx.com/">nginx.com</a>.</p>
+
+<p><em>Thank you for using nginx.</em></p>
+</body>
+</html>
+```
+
+Проверяем knockd:
+```
+root@centralRouter:~# ssh vagrant@192.168.255.1
+ssh: connect to host 192.168.255.1 port 22: Connection timed out
+
+root@centralRouter:~# knock 192.168.255.1 7000 8000 9000
+root@centralRouter:~# ssh vagrant@192.168.255.1
+vagrant@192.168.255.1's password:
+
+root@centralRouter:~# knock 192.168.255.1 9000 8000 7000
+root@centralRouter:~# ssh vagrant@192.168.255.1
+ssh: connect to host 192.168.255.1 port 22: Connection timed out
+```
 
