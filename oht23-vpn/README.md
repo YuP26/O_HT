@@ -1,5 +1,5 @@
 ### **Otus - Administrator Linux. Professional.**  
-#### **ДЗ №20 - VPN**  
+#### **ДЗ №23 - VPN**  
 **Цель** - Создать домашнюю сетевую лабораторию. Научится настраивать VPN-сервер в Linux-based системах.
 
 **Задание:**  
@@ -157,4 +157,33 @@ iperf Done.
 ```
 
 Проверяем RAS на базе OpenVPN:
+```
+$ sudo openvpn --config host-ras/client.conf
+
+$ ip r
+default via 192.168.0.1 dev wlp0s20f3 proto dhcp src 192.168.0.122 metric 600 
+10.10.10.0/24 via 10.10.10.1 dev tun0 
+10.10.10.0/24 dev tun0 proto kernel scope link src 10.10.10.2 
+192.168.0.0/24 dev wlp0s20f3 proto kernel scope link src 192.168.0.122 metric 600 
+192.168.56.0/24 dev vboxnet0 proto kernel scope link src 192.168.56.1 
+
+$ ip a
+10: tun0: <POINTOPOINT,MULTICAST,NOARP,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UNKNOWN group default qlen 500
+    link/none 
+    inet 10.10.10.2/24 scope global tun0
+       valid_lft forever preferred_lft forever
+    inet6 fe80::561a:4189:e3df:6f52/64 scope link stable-privacy 
+       valid_lft forever preferred_lft forever
+
+$ ping 10.10.10.1
+PING 10.10.10.1 (10.10.10.1) 56(84) bytes of data.
+64 bytes from 10.10.10.1: icmp_seq=413 ttl=64 time=1.59 ms
+64 bytes from 10.10.10.1: icmp_seq=414 ttl=64 time=1.57 ms
+64 bytes from 10.10.10.1: icmp_seq=415 ttl=64 time=2.08 ms
+64 bytes from 10.10.10.1: icmp_seq=416 ttl=64 time=1.35 ms
+64 bytes from 10.10.10.1: icmp_seq=417 ttl=64 time=2.12 ms
+64 bytes from 10.10.10.1: icmp_seq=418 ttl=64 time=0.487 ms
+64 bytes from 10.10.10.1: icmp_seq=419 ttl=64 time=1.04 ms
+64 bytes from 10.10.10.1: icmp_seq=420 ttl=64 time=1.99 ms
+64 bytes from 10.10.10.1: icmp_seq=421 ttl=64 time=1.57 ms
 ```
