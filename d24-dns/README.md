@@ -52,8 +52,7 @@ ansible [core 2.16.3]
 $ vagrant -v
 Vagrant 2.4.3
 ```
-Vagrantfile - generic/ubuntu2204\
-Предварительно создаем файл *hosts*. \
+Vagrantfile - alalinux/9
 
 ***
 ##### Запуск стенда. Запуск локального скрипта и playbook.
@@ -64,30 +63,51 @@ $ vagrant status
 ##### Проверка:
 Client:
 ```
+[vagrant@client ~]$ ping www.newdns.lab
+PING www.newdns.lab (192.168.50.15) 56(84) bytes of data.
+64 bytes from client (192.168.50.15): icmp_seq=1 ttl=64 time=0.022 ms
+64 bytes from client (192.168.50.15): icmp_seq=2 ttl=64 time=0.112 ms
+64 bytes from client (192.168.50.15): icmp_seq=3 ttl=64 time=0.133 ms
+^C
+--- www.newdns.lab ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 2004ms
+rtt min/avg/max/mdev = 0.022/0.089/0.133/0.048 ms
+[vagrant@client ~]$ ping web1.dns.lab
+PING web1.dns.lab (192.168.50.15) 56(84) bytes of data.
+64 bytes from client (192.168.50.15): icmp_seq=1 ttl=64 time=0.012 ms
+64 bytes from client (192.168.50.15): icmp_seq=2 ttl=64 time=0.111 ms
+64 bytes from client (192.168.50.15): icmp_seq=3 ttl=64 time=0.131 ms
+^C
+--- web1.dns.lab ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 2031ms
+rtt min/avg/max/mdev = 0.012/0.084/0.131/0.052 ms
+[vagrant@client ~]$ ping web2.dns.lab
+ping: web2.dns.lab: Name or service not known
+[vagrant@client ~]$ 
 
 ```
 Client2:
 ```
 [vagrant@client2 ~]$ ping www.newdns.lab
 ping: www.newdns.lab: Name or service not known
-[vagrant@client2 ~]$ ping www.newdns.lab
-ping: www.newdns.lab: Name or service not known
 [vagrant@client2 ~]$ ping web1.dns.lab
 PING web1.dns.lab (192.168.50.15) 56(84) bytes of data.
-64 bytes from 192.168.50.15 (192.168.50.15): icmp_seq=1 ttl=64 time=0.712 ms
-64 bytes from 192.168.50.15 (192.168.50.15): icmp_seq=2 ttl=64 time=1.63 ms
-64 bytes from 192.168.50.15 (192.168.50.15): icmp_seq=3 ttl=64 time=1.78 ms
+64 bytes from 192.168.50.15 (192.168.50.15): icmp_seq=1 ttl=64 time=1.43 ms
+64 bytes from 192.168.50.15 (192.168.50.15): icmp_seq=2 ttl=64 time=1.75 ms
+64 bytes from 192.168.50.15 (192.168.50.15): icmp_seq=3 ttl=64 time=0.996 ms
 ^C
 --- web1.dns.lab ping statistics ---
-3 packets transmitted, 3 received, 0% packet loss, time 2005ms
-rtt min/avg/max/mdev = 0.712/1.373/1.776/0.471 ms
-[vagrant@client2 ~]$  ping web2.dns.lab
+3 packets transmitted, 3 received, 0% packet loss, time 2003ms
+rtt min/avg/max/mdev = 0.996/1.390/1.745/0.307 ms
+[vagrant@client2 ~]$ ping web2.dns.lab
 PING web2.dns.lab (192.168.50.16) 56(84) bytes of data.
-64 bytes from client2 (192.168.50.16): icmp_seq=1 ttl=64 time=0.033 ms
-64 bytes from client2 (192.168.50.16): icmp_seq=2 ttl=64 time=0.109 ms
+64 bytes from client2 (192.168.50.16): icmp_seq=1 ttl=64 time=0.163 ms
+64 bytes from client2 (192.168.50.16): icmp_seq=2 ttl=64 time=0.158 ms
+64 bytes from client2 (192.168.50.16): icmp_seq=3 ttl=64 time=0.200 ms
 ^C
 --- web2.dns.lab ping statistics ---
-2 packets transmitted, 2 received, 0% packet loss, time 1002ms
-rtt min/avg/max/mdev = 0.033/0.071/0.109/0.038 ms
+3 packets transmitted, 3 received, 0% packet loss, time 2004ms
+rtt min/avg/max/mdev = 0.158/0.173/0.200/0.018 ms
 [vagrant@client2 ~]$ 
+
 ```
