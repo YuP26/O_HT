@@ -1,0 +1,30 @@
+global:
+  resolve_timeout: 20s
+
+route:
+  receiver: telegram
+  group_by: ['alertname', 'instance']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 10s
+
+receivers:
+- name: telegram
+  telegram_configs:
+  - bot_token: "---"
+    chat_id: ---             
+    parse_mode: HTML
+    message: |
+      {{ if eq .Status "firing" }}
+      🚨 <b>Алерт:</b> {{ .CommonAnnotations.summary }}
+
+      🖥 ВМ: <code>{{ index .CommonLabels "instance" }}</code>
+      📄 Описание: {{ .CommonAnnotations.description }}
+      {{ else if eq .Status "resolved" }}
+      ✅ <b>Починився</b> {{ .CommonAnnotations.summary }}
+
+      🖥 ВМ: <code>{{ index .CommonLabels "instance" }}</code>
+      {{ end }}
+    send_resolved: true
+
+
