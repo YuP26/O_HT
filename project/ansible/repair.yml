@@ -1,0 +1,163 @@
+---
+- name: common start
+  hosts: all
+  become: true
+  tasks:
+
+  - name: install packages
+    apt:
+      name:
+        - nano
+        - wget 
+        - curl
+        - chrony
+      state: present
+      update_cache: yes
+
+  - name: Set timezone to Europe/Moscow
+    timezone:
+      name: Europe/Moscow
+      
+  - name: Ensure chronyd is enabled and running
+    service:
+      name: chronyd
+      state: started
+      enabled: true
+
+- name: borg moment 1
+  hosts: backup_clients
+  become: true
+  tasks:
+
+  - name: copy ssh priv_key for backup
+    copy:
+      src: ssh_keys/{{ inventory_hostname }}/id_ed25519
+      dest: /root/.ssh/id_ed25519
+      owner: root
+      group: root
+      mode: "0700"
+
+  - name: copy ssh pub_key for backup
+    copy:
+      src: ssh_keys/{{ inventory_hostname }}/{{ inventory_hostname }}_key.pub
+      dest: /root/.ssh/id_ed25519.pub
+      owner: root
+      group: root
+      mode: "0700"
+
+  - name: restart sshd
+    service:
+      name: sshd
+      state: restarted 
+
+- name: master repair part
+  hosts: masterdb
+  become: true
+  tasks:
+
+  - name: Stop replica
+    mysql_query:
+      login_user: root
+      login_password: rootpass
+      query: "STOP REPLICA;"
+    delegate_to: slavedb
+
+  - name: Dump database
+    shell: |
+      mysqldump -u root -p'rootpass'  \
+        --all-databases\
+        --single-transaction \
+        > /tmp/slave_dump.sql
+    delegate_to: slavedb
+
+  - name: make local storage for ssh_key
+    delegate_to: localhost
+    become: false
+    file:
+      path: slavedb_dump/
+      state: directory
+      mode: '0700'
+ 
+  - name: Fetch dump from slave to control node
+    fetch:
+      src: /tmp/slave_dump.sql
+      dest: slavedb_dump/
+      flat: yes
+    delegate_to: slavedb
+
+  - name: Copy dump to master
+    copy:
+      src: slavedb_dump/slave_dump.sql
+      dest: /tmp/slave_dump.sql
+
+- name: nginx conf
+  import_playbook: nginx.yml
+
+- name: masterdb conf
+  import_playbook: masterdb.yml
+
+- name: master repair part
+  hosts: masterdb
+  become: true
+  tasks:
+
+  - name: Import dump 
+    shell: "mariadb -u root -p'rootpass' < /tmp/slave_dump.sql"
+
+  - name: Start slave replication
+    community.mysql.mysql_replication:
+      mode: changeprimary
+      master_host: "192.168.56.30"
+      master_user: repl_user
+      master_password: replpass
+      master_log_file: mysql-bin.000001
+      master_log_pos: 4
+      login_user: root
+      login_password: rootpass
+    ignore_errors: yes
+    delegate_to: slavedb
+
+  - name: Start slave
+    community.mysql.mysql_replication:
+      mode: startreplica
+      login_user: root
+      login_password: rootpass
+    delegate_to: slavedb
+      
+- name: slavedb conf
+  import_playbook: slavedb.yml
+
+- name: backend conf
+  import_playbook: backend.yml
+
+- name: monitoring conf
+  import_playbook: monitoring.yml
+
+- name: backup conf
+  import_playbook: backup.yml
+  tags: for backup
+
+- name: firewall
+  import_playbook: ufw.yml
+
+- name: borg repo init
+  hosts: backup
+  become: true
+  vars:
+    borg_repo: "borg@192.168.56.50:/backups/{{ hostvars[item]['inventory_hostname'] }}"
+    ssh_key_path: "/root/.ssh/borg_ed25519"
+    borg_passphrase: "Password"    
+  tasks:
+
+  - name: Add backup host key to known_hosts
+    shell: ssh-keyscan 192.168.56.50 >> /root/.ssh/known_hosts
+    delegate_to: "{{ item }}"
+    loop: "{{ groups['backup_clients'] }}"
+
+  - name: Init borg repo on backup server (first run only)
+    shell: BORG_PASSPHRASE="{{ borg_passphrase }}" borg init --encryption=repokey-blake2 {{ borg_repo }}
+    args:
+      creates: "/backups/{{ hostvars[item]['inventory_hostname'] }}/config"
+    ignore_errors: yes
+    delegate_to: "{{ item }}"
+    loop: "{{ groups['backup_clients'] }}"

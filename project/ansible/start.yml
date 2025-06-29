@@ -1,0 +1,24 @@
+---
+- name: common_start
+  import_playbook: common_start.yml
+
+- name: nginx conf
+  import_playbook: nginx.yml
+
+- name: masterdb conf
+  import_playbook: masterdb.yml
+
+- name: slavedb conf
+  import_playbook: slavedb.yml
+
+- name: backend conf
+  import_playbook: backend.yml
+
+- name: monitoring conf
+  import_playbook: monitoring.yml
+
+- name: backup conf
+  import_playbook: backup.yml
+
+- name: firewall
+  import_playbook: ufw.yml

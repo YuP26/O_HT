@@ -1,0 +1,57 @@
+- name: nginx-machine conf
+  hosts: nginx
+  become: true
+  tasks:
+
+  - name: install packages
+    apt:
+      name:
+        - nginx
+        - openssl
+      state: present
+
+  - name: Create SSL directory
+    file:
+      path: /etc/nginx/ssl
+      state: directory
+      mode: '0755'
+
+  - name: Copy SSL certificate
+    copy:
+      src: files/nginx/ssl/web.crt
+      dest: /etc/nginx/ssl/web.crt
+      owner: root
+      group: root
+      mode: '0644'
+
+  - name: Copy SSL key
+    copy:
+      src: files/nginx/ssl/web.key
+      dest: /etc/nginx/ssl/web.key
+      owner: root
+      group: root
+      mode: '0600'
+
+  - name: Nginx config
+    copy:
+      src: files/nginx/webapp.conf
+      dest: /etc/nginx/conf.d/webapp.conf
+      owner: root
+      group: root
+      mode: '0644'
+
+  - name: Remove default Nginx config (if exists)
+    file:
+      path: /etc/nginx/conf.d/default.conf
+      state: absent 
+  
+  - name: Remove default Nginx config (if exists)
+    file:
+      path: /etc/nginx/sites-enabled/default
+      state: absent 
+
+  - name: Ensure nginx is enabled and started
+    service:
+      name: nginx
+      state: restarted
+      enabled: true

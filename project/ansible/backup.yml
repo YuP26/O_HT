@@ -1,0 +1,187 @@
+- name: backup config
+  hosts: backup
+  become: true
+  tasks:
+
+  - name: install packages
+    apt:
+      name:
+        - borgbackup
+      state: present
+  
+  - name: add borg user
+    user:
+      name: borg
+      shell: /bin/bash
+      password: "{{ 'Otus1234' | password_hash('sha256') }}"
+      state: present
+      create_home: yes
+
+  - name: create .ssh directory
+    file:
+      path: /home/borg/.ssh
+      state: directory
+      owner: borg
+      group: borg
+      mode: '0700'
+
+  - name: create .ssh/authorized_keys
+    file:
+      path: /home/borg/.ssh/authorized_keys
+      owner: borg
+      group: borg
+      mode: '0600'
+      state: touch
+
+  - name: create directory for client pub_key
+    file:
+      path: /home/borg/.ssh/clients_pub_keys
+      state: directory
+      owner: borg
+      group: borg
+      mode: '0700'
+
+  - name: create /var/backup directory
+    file: 
+      path: /backups
+      state: directory
+      owner: borg
+      group: borg  
+
+  - name: copy clients pub keys
+    copy:
+      src: ssh_keys/{{ item }}
+      dest: /home/borg/.ssh/clients_pub_keys/
+      owner: borg
+      group: borg
+      mode: "0700"
+    loop:
+      - nginx/nginx_key.pub
+      - masterdb/masterdb_key.pub
+      - slavedb/slavedb_key.pub
+      - backend/backend_key.pub
+      - monitoring/monitoring_key.pub
+    
+  - name: Read client key from backup host
+    slurp:
+      src: "/home/borg/.ssh/clients_pub_keys/{{ item }}_key.pub"
+    loop:
+      - backend
+      - masterdb
+      - monitoring
+      - nginx
+      - slavedb
+    register: slurped_keys
+    delegate_to: backup
+    run_once: true
+
+  - name: Add keys to authorized_keys for borg user
+    authorized_key:
+      user: borg
+      key: "{{ item.content | b64decode }}"
+      state: present
+      manage_dir: true
+    loop: "{{ slurped_keys.results }}"
+    delegate_to: backup
+    run_once: true
+
+  - name: restart sshd
+    service:
+      name: sshd
+      state: restarted 
+
+#===
+#clients
+#===
+- name: backup_clients conf
+  hosts: backup_clients
+  become: true
+  vars:
+    borg_repo: "borg@192.168.56.50:/backups/{{ inventory_hostname }}"
+    ssh_key_path: "/root/.ssh/borg_ed25519"
+    borg_passphrase: "Password"         
+  tags: for backup
+  tasks:
+
+  - name: borgbackup install
+    apt:
+      name: borgbackup
+      state: present
+
+  - name: Add backup host key to known_hosts
+    shell: ssh-keyscan 192.168.56.50 >> /root/.ssh/known_hosts
+
+  - name: Init borg repo on backup server (first run only)
+    shell: BORG_PASSPHRASE="{{ borg_passphrase }}" borg init --encryption=repokey-blake2 {{ borg_repo }}
+    args:
+      creates: "/backups/{{ inventory_hostname }}/config"
+    ignore_errors: yes
+
+  - name: create backup service
+    copy: 
+      dest: /etc/systemd/system/borg-backup.service
+      content: |
+        [Unit]
+        Description=Borg Backup
+
+        [Service]
+        Type=oneshot
+
+        # Парольная фраза
+        Environment="BORG_PASSPHRASE={{ borg_passphrase }}"
+        # Репозиторий
+        Environment=REPO=borg@192.168.56.50:/backups/{{ inventory_hostname }}
+        # Что бэкапим
+        Environment=BACKUP_TARGET=/opt /var /home
+
+        # Логирование в файл с временными метками 
+        ExecStartPre=/bin/bash -c 'echo "==== Borg Backup started at $(date) ====" >> /var/log/borg-backup.log'
+
+        # Создание бэкапа 
+        ExecStart=/bin/sh -c '/bin/borg create --stats ${REPO}::etc-{now:%%Y-%%m-%%d_%%H:%%M:%%S} ${BACKUP_TARGET} >> /var/log/borg-backup.log 2>&1' 
+        ExecStartPost=/bin/sh -c '/bin/borg check ${REPO} >> /var/log/borg-backup.log 2>&1' 
+        ExecStartPost=/bin/sh -c '/bin/borg prune --list ---keep-within=2H --keep-daily=1 --keep-weekly=1  ${REPO} >> /var/log/borg-backup.log 2>&1'  
+
+        # Фиксация времени завершения
+        ExecStartPost=/bin/bash -c 'echo "==== Borg Backup finished at $(date) ====" >> /var/log/borg-backup.log'
+
+  - name: create backup timer
+    copy:
+      dest: /etc/systemd/system/borg-backup.timer
+      content: |
+        [Unit]
+        Description=Borg Backup
+
+        [Timer]
+        OnBootSec=1sec
+        OnUnitActiveSec=2min
+
+        [Install]
+        WantedBy=timers.target
+
+  - name: start timer
+    service: 
+      name: borg-backup.timer
+      daemon_reload: true
+      enabled: yes
+      state: restarted
+
+  - name: logrotate conf
+    copy:
+      dest: /etc/logrotate.d/borg-backup
+      content: |
+        /var/log/borg-backup.log {
+        daily
+        rotate 7
+        compress
+        missingok
+        notifempty
+        create 640 root adm
+        su root root
+        }
+  
+  - name: logrotate restart
+    service:
+      name: logrotate
+      state: restarted
+

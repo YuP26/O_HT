@@ -1,0 +1,80 @@
+- name: masterdb-machine config
+  hosts: masterdb
+  become: true
+  tasks:
+
+  - name: install packages
+    apt:
+      name:
+        - python3
+        - python3-pip
+        - gcc      
+        - build-essential
+        - pkg-config
+        - libmariadb-dev
+        - python3-dev
+        - mariadb-server
+      state: present
+
+  - name: Ensure PyMySQL is installed
+    pip:
+      name: mysqlclient
+      executable: pip3
+
+  - name: start and enable mariadb
+    service:
+      name: mariadb
+      state: started
+      enabled: true
+
+  - name: Set root password and create database/user for app
+    community.mysql.mysql_user:
+      login_user: root
+      login_password: "rootpass"
+      name: root
+      password: "rootpass"
+      host_all: true
+      priv: "*.*:ALL,GRANT"
+      state: present
+    ignore_errors: true
+
+  - name: Create application database
+    community.mysql.mysql_db:
+      name: webapp_db
+      state: present
+      login_user: root
+      login_password: rootpass
+
+  - name: Create user for replication
+    community.mysql.mysql_user:
+      name: repl_user
+      password: replpass
+      priv: "*.*:REPLICATION SLAVE"
+      host: "192.168.56.31"
+      state: present
+      login_user: root
+      login_password: rootpass
+
+  - name: Create webapp user
+    community.mysql.mysql_user:
+      name: webapp
+      host: "192.168.56.20"
+      password: "secret"
+      priv: "webapp_db.*:ALL"
+      state: present
+      login_user: root
+      login_password: "rootpass"
+
+  - name: Configure MariaDB for replication
+    copy:
+      src: files/db/master.cnf
+      dest: /etc/mysql/mariadb.conf.d/99-master.cnf
+      owner: root
+      group: root
+      mode: '0644'
+
+  - name: Restart MariaDB
+    service:
+      name: mariadb
+      state: restarted
+      enabled: true

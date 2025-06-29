@@ -1,0 +1,159 @@
+- name: finish by firewall
+  hosts: all
+  become: true
+  tasks:
+
+  - name: install ufw
+    apt:
+      name: ufw
+      state: present
+
+  - name: Set UFW default rules
+    ufw:
+      state: enabled
+      direction: "{{ item.direction }}"
+      policy: "{{ item.policy }}"
+    loop:
+      - { direction: incoming, policy: deny }
+      - { direction: outgoing, policy: allow }
+  
+  - name: all - ssh
+    ufw:
+      rule: allow
+      port: 22
+      proto: tcp
+
+  - name: all - monitoring
+    ufw:
+      rule: allow
+      port: "{{ item }}"
+      proto: tcp
+      from_ip: 192.168.56.40
+    loop:
+      - 514
+      - 9100
+    when: inventory_hostname != "monitoring"
+
+- name: nginx ufw
+  hosts: nginx
+  become: true
+  tasks:
+    
+  - name: nginx - all
+    ufw:
+      rule: allow
+      port: "{{ item }}"
+      proto: tcp
+    loop:
+      - 80
+      - 443
+      - 3000
+      - 9090
+      - 9093
+
+  - name: nginx - backend
+    ufw:
+      rule: allow
+      port: 8000
+      proto: tcp
+      from_ip: 192.168.56.20
+
+- name: backend ufw
+  hosts: backend
+  become: true
+  tasks:
+
+  - name: nginx - backend
+    ufw:
+      rule: allow
+      port: 8000
+      proto: tcp
+      from_ip: 192.168.56.10
+
+  - name: db - backend
+    ufw:
+      rule: allow
+      port: 3306
+      proto: tcp
+      from_ip: "{{ item }}"
+    loop:
+     - 192.168.56.30
+     - 192.168.56.31
+  
+- name: master ufw
+  hosts: masterdb
+  become: true
+  tasks:
+  
+  - name: master - backend, slave
+    ufw:
+      rule: allow
+      port: 3306
+      proto: tcp
+      from_ip: "{{ item }}"
+    loop:
+     - 192.168.56.20
+     - 192.168.56.31  
+
+- name: slave ufw
+  hosts: slave
+  become: true
+  tasks:
+  
+  - name: slave - backend, master
+    ufw:
+      rule: allow
+      port: 3306
+      proto: tcp
+      from_ip: "{{ item }}"
+    loop:
+     - 192.168.56.30
+     - 192.168.56.20
+
+- name: monitoring ufw
+  hosts: monitoring
+  become: true
+  tasks:
+  
+  - name: monitoring - all/rsyslog
+    ufw:
+      rule: allow
+      port: 514
+      proto: tcp
+      from_ip: "{{ item }}"
+    loop:
+     - 192.168.56.30
+     - 192.168.56.20
+     - 192.168.56.31
+     - 192.168.56.50
+     - 192.168.56.10
+  
+  - name: monitoring - all/node_exporter
+    ufw:
+      rule: allow
+      port: 9100
+      proto: tcp
+      from_ip: "{{ item }}"
+    loop:
+     - 192.168.56.30
+     - 192.168.56.20
+     - 192.168.56.31
+     - 192.168.56.50
+     - 192.168.56.10
+
+  - name: monitoring - nginx
+    ufw:
+      rule: allow
+      port: "{{ item }}"
+      proto: tcp
+    loop:
+      - 3000
+      - 9090
+      - 9093
+
+  - name: monitoring - host
+    ufw:
+      rule: allow
+      port: 8443
+      proto: tcp
+      from_ip: 192.168.56.1

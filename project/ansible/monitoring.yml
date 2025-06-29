@@ -1,0 +1,315 @@
+- name: monitoring_server config
+  hosts: monitoring
+  become: true
+  tasks:
+
+#rsyslog
+  - name: rsyslog install
+    apt:
+      name:
+        - rsyslog
+      state: present
+
+  - name: change rsyslog.conf
+    blockinfile: 
+      path: /etc/rsyslog.conf
+      block: |
+        # provides UDP syslog reception
+        module(load="imudp")
+        input(type="imudp" port="514")
+
+        # provides TCP syslog reception
+        module(load="imtcp")
+        input(type="imtcp" port="514")
+
+        #Add remote log 
+        $template RemoteLogs,"/var/log/rsyslog/%FROMHOST%/%PROGRAMNAME%.log"
+        if ($fromhost-ip != '127.0.0.1') then ?RemoteLogs
+        & ~
+      state: present
+
+  - name: restart rsyslog
+    service: 
+      name: rsyslog
+      state: restarted
+
+#grafana
+
+  - name: Prometheus script 1
+    shell: |
+      wget https://github.com/prometheus/prometheus/releases/download/v2.44.0/prometheus-2.44.0.linux-amd64.tar.gz
+
+      useradd --no-create-home --shell /bin/false prometheus
+      mkdir /etc/prometheus
+      mkdir /var/lib/prometheus
+      chown prometheus:prometheus /etc/prometheus
+      chown prometheus:prometheus /var/lib/prometheus
+
+      tar -xvzf prometheus-2.44.0.linux-amd64.tar.gz
+      mv prometheus-2.44.0.linux-amd64 prometheuspackage
+      cp prometheuspackage/prometheus /usr/local/bin/
+      cp prometheuspackage/promtool /usr/local/bin/
+
+      chown prometheus:prometheus /usr/local/bin/prometheus
+      chown prometheus:prometheus /usr/local/bin/promtool
+
+      cp -r prometheuspackage/consoles /etc/prometheus
+      cp -r prometheuspackage/console_libraries /etc/prometheus
+      chown -R prometheus:prometheus /etc/prometheus/consoles
+      chown -R prometheus:prometheus /etc/prometheus/console_libraries
+
+  - name: Prom conf
+    copy:
+      dest: /etc/prometheus/prometheus.yml
+      owner: prometheus
+      group: prometheus
+      src: files/monitoring/prometheus.yml
+      
+  - name: Prom serv
+    copy:
+      dest: /etc/systemd/system/prometheus.service
+      src: files/monitoring/prometheus.service
+
+  - name: NS script
+    shell: |
+      wget https://github.com/prometheus/node_exporter/releases/download/v1.5.0/node_exporter-1.5.0.linux-amd64.tar.gz
+      tar xzfv node_exporter-1.5.0.linux-amd64.tar.gz
+
+      useradd -rs /bin/false nodeusr
+      mv node_exporter-1.5.0.linux-amd64/node_exporter /usr/local/bin/
+
+  - name: NS serv
+    copy:
+      dest: /etc/systemd/system/node_exporter.service
+      src: files/monitoring/node_exporter.service
+
+
+  - name: NS restart
+    systemd:
+      name: node_exporter
+      daemon_reload: true
+      enabled: true
+      state: restarted
+
+  - name: Prom restart
+    systemd:
+      name: prometheus
+      daemon_reload: true
+      enabled: true
+      state: restarted
+
+  - name: grafana packages
+    apt: 
+      name: 
+        - libfontconfig1
+        - musl
+      state: present
+
+  - name: install grafana
+    shell: |
+      wget https://dl.grafana.com/enterprise/release/grafana-enterprise_9.5.2_amd64.deb
+      dpkg -i grafana-enterprise_9.5.2_amd64.deb
+
+  - name: copy dashboard
+    copy:
+      src: files/monitoring/ndb.json
+      dest: /etc/grafana/provisioning/dashboards/
+      owner: grafana
+      group: grafana
+
+  - name: Copy Prometheus datasource provisioning
+    copy:
+      dest: /etc/grafana/provisioning/datasources/prometheus.yml
+      content: |
+        apiVersion: 1
+        datasources:
+          - name: Prometheus
+            type: prometheus
+            access: proxy
+            url: http://localhost:9090
+            isDefault: true
+            editable: false
+
+  - name: provis conf
+    copy:
+      src: files/monitoring/dashboards.yaml
+      dest: /etc/grafana/provisioning/dashboards/
+      owner: grafana
+      group: grafana
+
+#https
+  - name: Create SSL directory
+    file:
+      path: /etc/grafana/ssl
+      state: directory
+      mode: '0755'
+
+  - name: Copy SSL certificate
+    copy:
+      src: files/monitoring/ssl/web.crt
+      dest: /etc/grafana/ssl/web.crt
+      owner: grafana
+      group: grafana
+      mode: '0644'
+
+  - name: Copy SSL key
+    copy:
+      src: files/monitoring/ssl/web.key
+      dest: /etc/grafana/ssl/web.key
+      owner: grafana
+      group: grafana
+      mode: '0600'
+
+  - name: Включить HTTPS в grafana.ini
+    ini_file:
+      path: /etc/grafana/grafana.ini
+      section: server
+      option: "{{ item.option }}"
+      value: "{{ item.value }}"
+    loop:
+      - { option: protocol, value: "https" }
+      - { option: http_port, value: "8443" }
+      - { option: cert_file, value: /etc/grafana/ssl/web.crt }
+      - { option: cert_key, value: /etc/grafana/ssl/web.key }
+
+  - name: Grafana restart
+    systemd:
+      name: grafana-server
+      daemon_reload: true
+      enabled: true
+      state: restarted
+
+  - name: AM script
+    shell: |
+      wget https://github.com/prometheus/alertmanager/releases/download/v0.25.0/alertmanager-0.25.0.linux-amd64.tar.gz
+      tar zxf alertmanager-0.25.0.linux-amd64.tar.gz
+
+      useradd --no-create-home --shell /bin/false alertmanager
+      usermod --home /var/lib/alertmanager alertmanager
+      mkdir /etc/alertmanager
+      mkdir /var/lib/alertmanager
+      mkdir -p /var/lib/prometheus/alertmanager
+
+      cp alertmanager-0.25.0.linux-amd64/amtool /usr/local/bin/
+      cp alertmanager-0.25.0.linux-amd64/alertmanager /usr/local/bin/
+      cp alertmanager-0.25.0.linux-amd64/alertmanager.yml /etc/alertmanager/
+      
+      chown -R alertmanager:alertmanager /etc/alertmanager /var/lib/alertmanager
+      chown alertmanager:alertmanager /usr/local/bin/{alertmanager,amtool}
+      echo "ALERTMANAGER_OPTS=\"\"" > /etc/default/alertmanager
+      chown alertmanager:alertmanager /etc/default/alertmanager
+      chown -R alertmanager:alertmanager /var/lib/prometheus/alertmanager
+
+  - name: AM serv
+    copy:
+      dest: /etc/systemd/system/alertmanager.service
+      src: files/monitoring/alertmanager.service
+
+  - name: AM rules
+    copy:
+      dest: /etc/prometheus/rules.yml
+      src: files/monitoring/rules.yml
+      owner: prometheus
+      group: prometheus
+
+  - name: AM rules
+    copy:
+      dest: /etc/alertmanager/alertmanager.yml
+      src: files/monitoring/alertmanager.yaml
+      owner: alertmanager
+      group: alertmanager
+
+  - name: am restart
+    systemd:
+      name: alertmanager
+      daemon_reload: true
+      enabled: true
+      state: restarted
+
+  - name: Prom restart
+    systemd:
+      name: prometheus
+      daemon_reload: true
+      enabled: true
+      state: restarted
+
+
+#===
+#clients
+#===
+- name: monitoring_clients conf
+  hosts: monitoring_clients
+  become: true
+  tasks:
+
+#rsyslog&auditd
+  - name: install packages
+    apt:
+      name:
+        - rsyslog
+        - auditd
+        - audispd-plugins
+      state: present
+
+  - name: Включение и запуск auditd
+    service:
+      name: auditd
+      state: started
+      enabled: true
+
+  - name: Добавление базовых правил аудита
+    copy:
+      dest: /etc/audit/rules.d/basic.rules
+      content: |
+        -w /etc/passwd -p wa -k passwd_change
+        -w /etc/shadow -p wa -k shadow_change
+        -w /usr/bin/sudo -p x -k sudo_exec
+        -w /usr/sbin/ -p x -k sbin_exec
+        -w /usr/bin/ -p x -k bin_exec
+
+  - name: Перезапуск auditd для применения правил
+    command: augenrules --load
+
+  - name: Включение отправки логов на сервер
+    copy:
+      dest: /etc/rsyslog.d/90-central.conf
+      content: |
+        *.* @@192.168.56.40:514
+
+  - name: Настройка сбора логов приложений (nginx, mariadb, grafana)
+    copy:
+      dest: /etc/rsyslog.d/99-app-logs.conf
+      content: |
+        module(load="imfile" PollingInterval="10")
+
+        input(type="imfile" File="/var/log/nginx/access.log" Tag="nginx-access" Severity="info" Facility="local1")
+        input(type="imfile" File="/var/log/nginx/error.log" Tag="nginx-error" Severity="error" Facility="local1")
+
+        local1.* @@192.168.56.40:514
+
+  - name: Перезапуск rsyslog
+    service:
+      name: rsyslog
+      state: restarted
+      enabled: true
+
+#node_exporter for grafana
+  - name: NS script
+    shell: |
+      wget https://github.com/prometheus/node_exporter/releases/download/v1.5.0/node_exporter-1.5.0.linux-amd64.tar.gz
+      tar xzfv node_exporter-1.5.0.linux-amd64.tar.gz
+
+      useradd -rs /bin/false nodeusr
+      mv node_exporter-1.5.0.linux-amd64/node_exporter /usr/local/bin/
+
+  - name: NS serv
+    copy:
+      dest: /etc/systemd/system/node_exporter.service
+      src: files/monitoring/node_exporter.service
+
+  - name: NS restart
+    systemd:
+      name: node_exporter
+      daemon_reload: true
+      enabled: true
+      state: restarted

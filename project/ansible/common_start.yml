@@ -1,0 +1,63 @@
+- name: all common_start config
+  hosts: all
+  become: true
+  tags: for backup
+  tasks:
+
+  - name: install packages
+    apt:
+      name:
+        - nano
+        - wget 
+        - curl
+        - chrony
+      state: present
+      update_cache: yes
+
+  - name: Set timezone to Europe/Moscow
+    timezone:
+      name: Europe/Moscow
+      
+  - name: Ensure chronyd is enabled and running
+    service:
+      name: chronyd
+      state: started
+      enabled: true
+
+- name: backup_clients ssh conf
+  hosts: backup_clients
+  become: true
+  tasks:
+  
+  - name: Generate SSH key (idempotent)
+    community.crypto.openssh_keypair:
+      path: /root/.ssh/id_ed25519
+      type: ed25519
+      mode: '0600'
+      state: present
+      force: false
+    register: pub_key_raw
+    no_log: true
+
+  - name: make local storage for ssh_key
+    delegate_to: localhost
+    become: false
+    file:
+      path: ssh_keys/{{ inventory_hostname }}/
+      state: directory
+      mode: '0700'
+
+  - name: Fetch private key to controller
+    fetch:
+      src: /root/.ssh/id_ed25519
+      dest: ssh_keys/{{ inventory_hostname }}/id_ed25519
+      flat: yes
+      mode: '0600'
+
+  - name: Fetch public key to controller
+    fetch:
+      src: /root/.ssh/id_ed25519.pub
+      dest: ssh_keys/{{ inventory_hostname }}/{{ inventory_hostname }}_key.pub
+      flat: yes
+      mode: '0644'
+    
