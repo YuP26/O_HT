@@ -71,16 +71,16 @@ $ ansible-playbook -i ansible/inventory.ini ansible/repair.yml --limit <hostname
 
 ****
 #### **Демонстрация:**
-Приложение:
+Приложение:\
 ![WebApp-Login](https://github.com/YuP26/O_HT/blob/main/project/screens/webapp1.png)\
 ![WebApp-Reg](https://github.com/YuP26/O_HT/blob/main/project/screens/webapp2.png)\
 ![WebApp-Noteadd](https://github.com/YuP26/O_HT/blob/main/project/screens/webapp3.png)\
 ![WebApp-Note](https://github.com/YuP26/O_HT/blob/main/project/screens/webapp4.png)\
 ![WebApp-Notedel](https://github.com/YuP26/O_HT/blob/main/project/screens/webapp5.png)\
 
-Мониторинг-алертинг:
-(1 скрин)
+Мониторинг-алертинг:\
 ![Мониторинг](https://github.com/YuP26/O_HT/blob/main/project/screens/monitoring.png)\
+![Алертинг](https://github.com/YuP26/O_HT/blob/main/project/screens/alerting.png)\
 
 Бэкапы:
 ```
