@@ -1,0 +1,28 @@
+Vagrant.configure("2") do |config|
+nodes = [
+    { name: "nginx",     ip: "192.168.56.10", memory: 1024 },
+    { name: "backend",   ip: "192.168.56.20", memory: 2048 },
+    { name: "masterdb",  ip: "192.168.56.30", memory: 1024 },
+    { name: "slavedb",   ip: "192.168.56.31", memory: 1024 },
+    { name: "monitoring",ip: "192.168.56.40", memory: 2048 },
+    { name: "backup",    ip: "192.168.56.50", memory: 1024 }
+  ]
+
+
+  nodes.each do |node|
+    config.vm.define node[:name] do |nodeconfig|
+      nodeconfig.vm.box = "generic/ubuntu2204"
+      nodeconfig.vm.hostname = node[:name]
+      nodeconfig.vm.provider "virtualbox" do |vb|
+        vb.memory = node[:memory]
+        vb.cpus = 2
+        
+      #VB network
+      nodeconfig.vm.network "private_network", 
+        ip: node[:ip], 
+        adapter: 2        
+
+      end
+    end
+  end
+end
