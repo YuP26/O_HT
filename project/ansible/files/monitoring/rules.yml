@@ -1,0 +1,13 @@
+groups:
+  - name: node_down
+    rules:
+      - alert: NodeDown
+        expr: up == 0
+        for: 5s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Node {{ $labels.instance }} is down"
+          description: "{{ $labels.instance }} упал"
+          
+         
