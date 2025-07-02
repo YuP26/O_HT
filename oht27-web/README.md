@@ -21,7 +21,7 @@ VirtualBox v.7.0.26 r168464
 Поднимаем виртуальную машину и сразу через провижининг устанавливаем в нее docker согласно предложенной инструкции 
 
 ***
-Скриншоты:
+Скриншоты:\
 ![8081](https://github.com/YuP26/O_HT/blob/main/oht27-web/screens/8081.png)\
 ![8082](https://github.com/YuP26/O_HT/blob/main/oht27-web/screens/8082.png)\
 ![8083](https://github.com/YuP26/O_HT/blob/main/oht27-web/screens/8083.png)\
