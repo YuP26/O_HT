@@ -28,6 +28,7 @@
 | slavedb | 192.168.56.31  | слейв БД для репликаций мастера |
 | monitorint | 192.168.56.40  | grafana+rsyslog  |
 | backup | 192.168.56.50  | borgbackup для бэкапа VMs|
+
 Схема:\
 ![schema](https://github.com/YuP26/O_HT/blob/main/project/screens/schema.png)\
 Состав плэйбука:
