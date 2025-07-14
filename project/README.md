@@ -28,7 +28,8 @@
 | slavedb | 192.168.56.31  | слейв БД для репликаций мастера |
 | monitorint | 192.168.56.40  | grafana+rsyslog  |
 | backup | 192.168.56.50  | borgbackup для бэкапа VMs|
-
+Схема:\
+![schema](https://github.com/YuP26/O_HT/blob/main/project/screens/schema.png)\
 Состав плэйбука:
 1) start - поочередно перебирает все плейбуки для полного развертывания приложения;
 2) common_start - установка базовых пакетов, настройка времени, генерация ssh-ключенй для настройки borgbackup;
@@ -64,9 +65,10 @@ $ ansible-playbook -i ansible/inventory.ini ansible/start.yml
 $ ansible-playbook -i ansible/inventory.ini ansible/repair.yml --limit <hostname>
 ```
 Принцип: 
-1) Nginx, Backend, Monitoring, Slave - проходятся по базовой настройке.
+1) Nginx, Backend, Slave - проходятся по базовой настройке.
 2) MasterDB - дополнительно остнавливает реплику, снимает дамп, передает его на мастер и снова запускает реплику.
 3) Backup - заново добавляются уже созданные ключи и частично прогоняется базовый конфиг.
+4) Monitoring - восстанавливаем в отдельный каталог собранные rsyslogs.
 
 
 ****
